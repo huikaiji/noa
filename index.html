@@ -14,12 +14,14 @@ body{max-width:980px;margin:12px auto;padding:10px;background:#f5f7fa;}
 .btn-red{background:#dd3b3b;color:white}
 .btn-gray{background:#666;color:white}
 textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px solid #ccc;border-radius:6px}
+#issueArea{min-height:140px;}
 .input-row{margin:8px 0;display:flex;gap:8px;align-items:center}
 input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 .input-full{width:100%;}
 .stat{background:#eef4ff;padding:12px;border-radius:8px;font-size:14px;white-space:pre-wrap;line-height:1.6}
 .check-item{display:flex;align-items:center;gap:6px;margin:8px 0;}
-h4{margin:10px 0 6px 0;}
+.title-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px 0;}
+h4{margin:0;font-size:16px;}
 </style>
 </head>
 <body>
@@ -31,13 +33,13 @@ h4{margin:10px 0 6px 0;}
 </div>
 <div class="input-row">
 <label>测试总里程(km)：</label>
-<input id="totalMile" type="number" placeholder="输入数字，例如300">
+<input id="totalMile" type="number" placeholder="输入里程，例如300">
 </div>
 <div class="check-item">
 <input type="checkbox" id="tteCheck">
 <label for="tteCheck">tte反馈（勾选后日志自动追加 tte）</label>
 </div>
-<p>点击事件按钮，自动带入当前时间；日志框可手动编辑，手动输入内容全部参与统计</p>
+<p>点击事件按钮自动生成时间戳；日志自动本地保存，关闭页面不会丢失</p>
 
 <div>
 <h4>✅正常时间记录（蓝色）</h4>
@@ -98,23 +100,70 @@ h4{margin:10px 0 6px 0;}
 </div>
 
 <div style="margin:10px 0;">
-<button class="btn btn-blue" onclick="copyLog()">复制全部日志</button>
 <button class="btn btn-blue" onclick="calcStat()">刷新完整统计</button>
-<button class="btn btn-blue" onclick="copyStatText()">复制路测统计</button>
+<button class="btn btn-red" onclick="clearLocalLog()">清空本地日志</button>
 </div>
 </div>
 
 <div class="box">
-<h4>📝原始日志输出（可直接编辑修改，手动输入全部参与统计）</h4>
+<div class="title-row">
+<h4>📝原始日志输出（自动本地持久化）</h4>
+<button class="btn btn-blue" onclick="copyLog()">复制全部日志</button>
+</div>
 <textarea id="logArea"></textarea>
 </div>
 
 <div class="box">
+<div class="title-row">
+<h4>📌主要问题点（手动编辑填写，自动保存）</h4>
+<button class="btn btn-blue" onclick="copyLogAndIssue()">复制日志+主要问题</button>
+</div>
+<textarea id="issueArea" placeholder="在这里填写本次路测总结、主要问题、复现条件、现象描述等"></textarea>
+</div>
+
+<div class="box">
+<div class="title-row">
 <h4>📊完整路测统计（点击刷新完整统计）</h4>
+<button class="btn btn-blue" onclick="copyStatText()">复制路测统计</button>
+</div>
 <div class="stat" id="statBox"></div>
 </div>
 
 <script>
+//本地存储KEY
+const STORAGE_KEY_LOG = "noa_log_content";
+const STORAGE_KEY_ISSUE = "noa_issue_content";
+const STORAGE_KEY_INFO = "noa_test_info";
+const STORAGE_KEY_MILE = "noa_total_mile";
+
+//页面加载读取本地存储
+window.onload = function(){
+    const saveLog = localStorage.getItem(STORAGE_KEY_LOG);
+    const saveIssue = localStorage.getItem(STORAGE_KEY_ISSUE);
+    const saveInfo = localStorage.getItem(STORAGE_KEY_INFO);
+    const saveMile = localStorage.getItem(STORAGE_KEY_MILE);
+    if(saveLog!==null) document.getElementById('logArea').value = saveLog;
+    if(saveIssue!==null) document.getElementById('issueArea').value = saveIssue;
+    if(saveInfo!==null) document.getElementById('testInfo').value = saveInfo;
+    if(saveMile!==null) document.getElementById('totalMile').value = saveMile;
+
+    //监听输入框，自动保存测试信息、里程
+    document.getElementById('testInfo').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_INFO,document.getElementById('testInfo').value);
+    })
+    document.getElementById('totalMile').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_MILE,document.getElementById('totalMile').value);
+    })
+    //监听文本框变化，自动保存日志
+    document.getElementById('logArea').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_LOG,document.getElementById('logArea').value);
+    })
+    //监听主要问题框，自动持久化
+    document.getElementById('issueArea').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_ISSUE,document.getElementById('issueArea').value);
+    })
+}
+
 // 获取当前时分秒
 function getNowTime(){
 let d=new Date();
@@ -130,10 +179,12 @@ const ta=document.getElementById('logArea');
 let info=document.getElementById('testInfo').value.trim();
 let currentText=ta.value;
 if(currentText==="" && info){
-currentText = info+"\n";
+    currentText = info + "\n";
 }
 if(currentText!=="" && !currentText.endsWith("\n")) currentText+="\n";
 ta.value = currentText + line;
+//写入本地存储
+localStorage.setItem(STORAGE_KEY_LOG,ta.value);
 }
 
 //普通按钮事件
@@ -177,6 +228,15 @@ appendLogLine(line);
 document.getElementById('otherInput').value='';
 }
 
+//清空本地全部日志+问题点
+function clearLocalLog(){
+if(!confirm("确认清空全部本地日志+主要问题点？数据将无法恢复！")) return;
+document.getElementById('logArea').value = "";
+document.getElementById('issueArea').value = "";
+localStorage.removeItem(STORAGE_KEY_LOG);
+localStorage.removeItem(STORAGE_KEY_ISSUE);
+}
+
 //复制全部日志：读取textarea完整value
 async function copyLog(){
 const text = document.getElementById('logArea').value;
@@ -188,7 +248,24 @@ try{
 await navigator.clipboard.writeText(text);
 alert("✅全部原始日志已复制");
 }catch(err){
-alert("❌复制失败，请浏览器允许剪贴板权限");
+alert("❌复制失败，请浏览器允许剪贴板权限，可以手动全选拷贝");
+}
+}
+
+//复制【日志 + 主要问题点】合并输出
+async function copyLogAndIssue(){
+const logText = document.getElementById('logArea').value;
+const issueText = document.getElementById('issueArea').value;
+let combineText = "";
+combineText += "=====原始日志=====\n";
+combineText += logText;
+combineText += "\n\n=====主要问题点=====\n";
+combineText += issueText;
+try{
+await navigator.clipboard.writeText(combineText);
+alert("✅日志+主要问题点已一并复制");
+}catch(err){
+alert("❌复制失败，可以手动全选拷贝文本");
 }
 }
 
@@ -203,7 +280,7 @@ try{
 await navigator.clipboard.writeText(statText);
 alert("✅路测统计已复制");
 }catch(err){
-alert("❌复制失败，请浏览器允许剪贴板权限");
+alert("❌复制失败，可以手动全选拷贝统计文本");
 }
 }
 
@@ -216,11 +293,11 @@ const lines = rawText.split('\n');
 
 let cnt={
 safeIntervene:0,
-nonSafeIntervene:0,
+unSafeIntervene:0,
 dragon:0,
 ilcOk:0,ilcFail:0,
 alcOk:0,alcFail:0,
-accMisBrake:0,
+accBadBrake:0,
 avoidOk:0,avoidFail:0,
 tunnelOk:0,tunnelFail:0,
 rampOk:0,rampFail:0
@@ -230,13 +307,13 @@ lines.forEach(line=>{
 const l=line.trim();
 if(!l) return;
 if(l.includes("安全介入")) cnt.safeIntervene++;
-if(l.includes("非安全介入")) cnt.nonSafeIntervene++;
+if(l.includes("非安全介入")) cnt.unSafeIntervene++;
 if(l.includes("画龙")) cnt.dragon++;
 if(l.includes("正常拨杆换道")) cnt.ilcOk++;
 if(l.includes("拨杆换道失败")) cnt.ilcFail++;
 if(l.includes("正常自动换道")) cnt.alcOk++;
 if(l.includes("自动换道失败")) cnt.alcFail++;
-if(l.includes("异常制动")) cnt.accMisBrake++;
+if(l.includes("异常制动")) cnt.accBadBrake++;
 if(l.includes("正常避让")) cnt.avoidOk++;
 if(l.includes("避让晚")||l.includes("避让未提示")||l.includes("未避让")) cnt.avoidFail++;
 if(l.includes("通过隧道")) cnt.tunnelOk++;
@@ -257,15 +334,15 @@ return (ok/total*100).toFixed(2)+"%";
 
 let out="";
 out += `1. 总里程：${mile>0?mile:'未填写'} km\n`;
-out += `2. 安全介入次数：${cnt.safeIntervene}次，实际指标：${perK(cnt.safeIntervene)} 次/千公里\n`;
-out += `3. 非安全介入率：${cnt.nonSafeIntervene}次，实际指标：${perK(cnt.nonSafeIntervene)} 次/千公里\n`;
-out += `4. 车道保持（画龙）：${cnt.dragon}次，实际指标：${perK(cnt.dragon)} 次/千公里\n`;
-out += `5. 拨杆换道ILC：总共${cnt.ilcOk+cnt.ilcFail}次，失败${cnt.ilcFail}次，实际指标：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
-out += `6. 自动换道ALC: 总共${cnt.alcOk+cnt.alcFail}次，失败${cnt.alcFail}次，实际指标：${rate(cnt.alcOk,cnt.alcFail)}\n`;
-out += `7. 自适应巡航ACC: 误制动次数${cnt.accMisBrake}次，实际指标${perK(cnt.accMisBrake)} 次/千公里\n`;
-out += `8. 智能避让：总共${cnt.avoidOk+cnt.avoidFail}次，失败${cnt.avoidFail}次，实际指标：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
-out += `9. 隧道通行成功率：总共${cnt.tunnelOk+cnt.tunnelFail}次，失败${cnt.tunnelFail}次，实际指标：${rate(cnt.tunnelOk,cnt.tunnelFail)}\n`;
-out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，实际指标：${rate(cnt.rampOk,cnt.rampFail)}\n`;
+out += `2. 安全介入次数：${cnt.safeIntervene}次，千公里指标：${perK(cnt.safeIntervene)} 次/千公里\n`;
+out += `3. 非安全介入次数：${cnt.unSafeIntervene}次，千公里指标：${perK(cnt.unSafeIntervene)} 次/千公里\n`;
+out += `4. 车道保持画龙：${cnt.dragon}次，千公里指标：${perK(cnt.dragon)} 次/千公里\n`;
+out += `5. 拨杆换道ILC：成功${cnt.ilcOk}次，失败${cnt.ilcFail}次，成功率：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
+out += `6. 自动换道ALC: 成功${cnt.alcOk}次，失败${cnt.alcFail}次，成功率：${rate(cnt.alcOk,cnt.alcFail)}\n`;
+out += `7. ACC异常制动：${cnt.accBadBrake}次，千公里指标：${perK(cnt.accBadBrake)} 次/千公里\n`;
+out += `8. 避让事件：成功${cnt.avoidOk}次，失败${cnt.avoidFail}次，避让成功率：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
+out += `9. 隧道场景：正常通行${cnt.tunnelOk}次，异常${cnt.tunnelFail}次\n`;
+out += `10.匝道场景：正常通行${cnt.rampOk}次，异常${cnt.rampFail}次\n`;
 
 document.getElementById('statBox').innerText=out;
 }
