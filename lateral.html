@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <title>自主横向事件记录工具</title>
@@ -22,9 +22,48 @@ h4{margin:0;font-size:16px;margin-top:12px;}
 .event-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;}
 .event-row select{flex:1;min-width:220px;}
 .btn-line{display:flex;align-items:center;gap:6px;margin:4px 0;flex-wrap:wrap}
-.ramp-group{margin:8px 0;}
+.ramp-group{margin:8px 0;display:grid;grid-template-columns: repeat(6, auto);gap:4px;}
 .ramp-btn{padding:6px 8px;font-size:12px;margin:2px;}
 .ramp-popup{border:1px solid #ccc;padding:8px;border-radius:8px;margin:4px 0 10px 16px;display:none;}
+
+/* ========== 手机移动端适配 ========== */
+@media (max-width: 768px) {
+    body {
+        margin: 4px auto;
+        padding: 6px;
+    }
+    .box {
+        padding:10px;
+    }
+    textarea {
+        min-height:140px !important;
+        font-size:13px;
+    }
+    #issueArea {
+        min-height:100px !important;
+    }
+    .stat {
+        font-size:12px;
+        padding:8px;
+    }
+    h4 {
+        font-size:15px;
+    }
+    .btn {
+        padding:6px 8px;
+        font-size:12px;
+    }
+    .ramp-btn {
+        padding:5px 6px;
+        font-size:11px;
+    }
+    .event-row select{
+        min-width:160px;
+    }
+    .ramp-group{
+        grid-template-columns: repeat(4, auto);
+    }
+}
 </style>
 </head>
 <body>
@@ -76,7 +115,6 @@ h4{margin:0;font-size:16px;margin-top:12px;}
 <button class="btn btn-blue" onclick="addNormalLog('正常拨杆换道')">正常拨杆换道</button>
 <button class="btn btn-blue" onclick="addNormalLog('正常自动换道')">正常自动换道</button>
 <button class="btn btn-blue" onclick="addNormalLog('通过隧道')">通过隧道</button>
-<button class="btn btn-blue" onclick="addNormalLog('通过匝道')">通过匝道</button>
 </div>
 </div>
 
@@ -144,27 +182,27 @@ h4{margin:0;font-size:16px;margin-top:12px;}
 </div>
 </div>
 
-<!-- 匝道模块重构：一行1~12号匝道小按钮，点击展开选择问题 -->
+<!-- 匝道模块：12个按钮两行布局，文字简化 -->
 <div>
-<h4>🔴匝道问题</h4>
+<h4>🔴匝道记录</h4>
 <div class="ramp-group">
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(1)">1号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(2)">2号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(3)">3号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(4)">4号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(5)">5号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(6)">6号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(7)">7号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(8)">8号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(9)">9号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(10)">10号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(11)">11号匝道</button>
-<button class="btn btn-red ramp-btn" onclick="openRampPanel(12)">12号匝道</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(1)">1号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(2)">2号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(3)">3号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(4)">4号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(5)">5号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(6)">6号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(7)">7号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(8)">8号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(9)">9号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(10)">10号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(11)">11号</button>
+<button class="btn btn-red ramp-btn" onclick="openRampPanel(12)">12号</button>
 </div>
 <div id="rampPopup" class="ramp-popup">
 <input type="hidden" id="currentRampNo">
 <select id="selRampIssue">
-<option value="">--选择匝道问题--</option>
+<option value="通过匝道">通过匝道</option>
 <option value="匝道压线">匝道压线</option>
 <option value="匝道前不减速">匝道前不减速</option>
 <option value="匝道内行驶左侧车道">匝道内行驶左侧车道</option>
@@ -178,7 +216,7 @@ h4{margin:0;font-size:16px;margin-top:12px;}
 </select>
 <input type="checkbox" id="tteRamp">
 <label for="tteRamp">TTE</label>
-<button class="btn btn-red" onclick="addRampLog()">记录匝道问题</button>
+<button class="btn btn-red" onclick="addRampLog()">记录匝道</button>
 <button class="btn btn-gray" onclick="closeRampPanel()">关闭</button>
 </div>
 </div>
@@ -376,7 +414,7 @@ function addLogFromSelect(selId,tteId){
 function openRampPanel(no){
     document.getElementById("currentRampNo").value = no;
     document.getElementById("rampPopup").style.display="block";
-    document.getElementById("selRampIssue").value="";
+    document.getElementById("selRampIssue").value="通过匝道";
     document.getElementById("tteRamp").checked=false;
 }
 function closeRampPanel(){
@@ -387,11 +425,11 @@ function addRampLog(){
     const issue = document.getElementById("selRampIssue").value.trim();
     const tteCb = document.getElementById("tteRamp");
     if(!issue){
-        alert("请选择匝道问题类型");
+        alert("请选择匝道记录类型");
         return;
     }
     const time=getNowTime();
-    let line=`${time} ${no}号匝道${issue}`;
+    let line=`${time} ${no}号${issue}`;
     if(tteCb.checked){
         line += ` tte`;
     }
@@ -466,7 +504,7 @@ alert("❌复制失败，可以手动全选拷贝统计文本");
 }
 }
 
-//统计计算：适配1-12号匝道所有问题
+//统计计算：适配1-12号匝道所有记录
 function calcStat(){
 const rawText=document.getElementById('logArea').value;
 const mileInput=parseFloat(document.getElementById('totalMile').value);
@@ -511,10 +549,13 @@ if(l.includes("正常避让")) cnt.avoidOk++;
 if(l.includes("避让晚")||l.includes("避让未提示")||l.includes("未避让")||l.includes("避让压线")||l.includes("避让播报延迟")) cnt.avoidFail++;
 // 隧道通行统计
 if(l.includes("通过隧道")) cnt.tunnelOk++;
-// 匝道正常通行
-if(l.includes("通过匝道")) cnt.rampOk++;
-// 1-12号所有匝道问题统一计入匝道失败
-if(/\d+号匝道/.test(l)) cnt.rampFail++;
+
+//匝道统计：包含【通过匝道】→正常；其余匝道关键词→失败
+if(/\d+号通过匝道/.test(l)){
+    cnt.rampOk++;
+}else if(/\d+号/.test(l)){
+    cnt.rampFail++;
+}
 });
 
 function perK(count){
@@ -533,12 +574,12 @@ out += `1. 总里程：${mile>0?mile:'未填写'}km\n`;
 out += `2. 安全介入次数：${cnt.safeIntervene}次，实际指标：${perK(cnt.safeIntervene)}次/千公里\n`;
 out += `3. 非安全介入次数：${cnt.unSafeIntervene}次，实际指标：${perK(cnt.unSafeIntervene)}次/千公里\n`;
 out += `4. 车道保持（画龙）：${cnt.lccDragon}次，实际指标：${perK(cnt.lccDragon)}次/千公里\n`;
-out += `5. 拨杆换道ILC：总共${cnt.ilcOk+cnt.ilcFail}次，失败${cnt.ilcFail}次，实际指标：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
-out += `6. 自动换道ALC: 总共${cnt.alcOk+cnt.alcFail}次，失败${cnt.alcFail}次，实际指标：${rate(cnt.alcOk,cnt.alcFail)}\n`;
+out += `5. 拨杆换道ILC：总共${cnt.ilcOk+cnt.ilcFail}次，失败${cnt.ilcFail}次，成功率：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
+out += `6. 自动换道ALC: 总共${cnt.alcOk+cnt.alcFail}次，失败${cnt.alcFail}次，成功率：${rate(cnt.alcOk,cnt.alcFail)}\n`;
 out += `7. 自适应巡航ACC: 误制动次数${cnt.accErrBrake}次，实际指标${perK(cnt.accErrBrake)}次/千公里\n`;
-out += `8. 智能避让：总共${cnt.avoidOk+cnt.avoidFail}次，失败${cnt.avoidFail}次，实际指标：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
-out += `9. 隧道通行成功率：总共${cnt.tunnelOk+cnt.tunnelFail}次，失败${cnt.tunnelFail}次，实际指标：${rate(cnt.tunnelOk,cnt.tunnelFail)}\n`;
-out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，实际指标：${rate(cnt.rampOk,cnt.rampFail)}。`;
+out += `8. 智能避让：总共${cnt.avoidOk+cnt.avoidFail}次，失败${cnt.avoidFail}次，成功率：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
+out += `9. 隧道通行成功率：总共${cnt.tunnelOk+cnt.tunnelFail}次，失败${cnt.tunnelFail}次，成功率：${rate(cnt.tunnelOk,cnt.tunnelFail)}\n`;
+out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，成功率：${rate(cnt.rampOk,cnt.rampFail)}。`;
 document.getElementById('statBox').innerText=out;
 }
 </script>
