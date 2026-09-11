@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -10,93 +10,181 @@ body{max-width:980px;margin:12px auto;padding:10px;background:#f5f7fa;}
 .box{background:#fff;padding:14px;border-radius:10px;margin-bottom:12px;box-shadow:0 1px 4px #0000001a}
 .btn{padding:8px 10px;margin:4px;border:none;border-radius:6px;font-size:13px;cursor:pointer}
 .btn-blue{background:#2b7bdd;color:white}
-.btn-orange{background:#f28c22;color:white}
 .btn-red{background:#dd3b3b;color:white}
-.btn-gray{background:#666;color:white}
 textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 #issueArea{min-height:140px;}
-.input-row{margin:8px 0;display:flex;gap:8px;align-items:center}
-input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
+.input-row{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 .input-full{width:100%;}
 .stat{background:#eef4ff;padding:12px;border-radius:8px;font-size:14px;white-space:pre-wrap;line-height:1.6}
 .check-item{display:flex;align-items:center;gap:6px;margin:8px 0;}
 .title-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px 0;}
 h4{margin:0;font-size:16px;}
+.event-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;}
+.event-row select{flex:1;min-width:220px;}
+.btn-line{display:flex;align-items:center;gap:6px;margin:4px 0;flex-wrap:wrap}
 </style>
 </head>
 <body>
 <div class="box">
 <h3>🚗 NOA路测事件记录仪</h3>
 <div class="input-row">
-<label>测试信息：</label>
-<input id="testInfo" class="input-full" placeholder="例：2026‑08‑31 377车 36t 晴天">
+<label>日期：</label>
+<input id="testDate" type="date">
+
+<label>车辆：</label>
+<select id="testCar">
+<option value="377车" selected>377车</option>
+<option value="382车">382车</option>
+<option value="383车">383车</option>
+</select>
+
+<label>重量：</label>
+<select id="testWeight">
+<option value="35t">35t</option>
+<option value="36t">36t</option>
+<option value="37t">37t</option>
+<option value="38t">38t</option>
+<option value="39t">39t</option>
+<option value="40t" selected>40t</option>
+<option value="41t">41t</option>
+</select>
+
+<label>天气：</label>
+<select id="testWeather">
+<option value="晴天" selected>晴天</option>
+<option value="阴天">阴天</option>
+<option value="雨天">雨天</option>
+<option value="夜间">夜间</option>
+</select>
 </div>
 <div class="input-row">
 <label>测试总里程(km)：</label>
-<input id="totalMile" type="number" placeholder="输入里程，例如300">
-</div>
-<div class="check-item">
-<input type="checkbox" id="tteCheck">
-<label for="tteCheck">tte反馈（勾选后日志自动追加 tte）</label>
-</div>
-<p>点击事件按钮自动生成时间戳；日志自动本地保存，关闭页面不会丢失</p>
-
-<div>
-<h4>✅正常时间记录（蓝色）</h4>
-<button class="btn btn-blue" onclick="addLog('正常避让')">正常避让</button>
-<button class="btn btn-blue" onclick="addLog('正常拨杆换道')">正常拨杆换道</button>
-<button class="btn btn-blue" onclick="addLog('正常自动换道')">正常自动换道</button>
-<button class="btn btn-blue" onclick="addLog('通过隧道')">通过隧道</button>
-<button class="btn btn-blue" onclick="addLog('通过匝道')">通过匝道</button>
+<input id="totalMile" type="number" placeholder="输入里程，例如300" value="300">
+<label>路线：</label>
+<input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市">
 </div>
 
+<p>正常事件直接点击按钮（无TTE勾选）；其余问题事件下拉选择，勾选本行TTE后点记录；日志自动本地保存，关闭页面不会丢失</p>
+
 <div>
-<h4>⚠️LCC问题（橙色）</h4>
-<button class="btn btn-orange" onclick="addLog('超车压线')">超车压线</button>
-<button class="btn btn-orange" onclick="addLog('弯道内压线')">弯道内压线</button>
-<button class="btn btn-orange" onclick="addLog('画龙')">画龙</button>
+<h4>✅正常事件记录（蓝色，直接点击）</h4>
+<div class="btn-line">
+<button class="btn btn-blue" onclick="addNormalLog('正常避让')">正常避让</button>
+<button class="btn btn-blue" onclick="addNormalLog('正常拨杆换道')">正常拨杆换道</button>
+<button class="btn btn-blue" onclick="addNormalLog('正常自动换道')">正常自动换道</button>
+<button class="btn btn-blue" onclick="addNormalLog('通过隧道')">通过隧道</button>
+<button class="btn btn-blue" onclick="addNormalLog('通过匝道')">通过匝道</button>
+</div>
 </div>
 
 <div>
-<h4>⚠️ACC问题（橙色）</h4>
-<button class="btn btn-orange" onclick="addLog('未制动')">未制动</button>
-<button class="btn btn-orange" onclick="addLog('动力不足')">动力不足</button>
-<button class="btn btn-orange" onclick="addLog('超速')">超速</button>
-<button class="btn btn-orange" onclick="addLog('异常制动')">异常制动</button>
+<h4>🔴LCC问题</h4>
+<div class="event-row">
+<select id="selLcc">
+<option value="">--选择LCC问题--</option>
+<option value="超车压线">超车压线</option>
+<option value="弯道内压线">弯道内压线</option>
+<option value="画龙">画龙</option>
+<option value="LCC持续偏右">LCC持续偏右</option>
+<option value="LCC持续偏左">LCC持续偏左</option>
+</select>
+<input type="checkbox" id="tteLcc">
+<label for="tteLcc">TTE</label>
+<button class="btn btn-red" onclick="addLogFromSelect('selLcc','tteLcc')">记录</button>
+</div>
 </div>
 
 <div>
-<h4>🔴避让问题（红色）</h4>
-<button class="btn btn-red" onclick="addLog('避让晚')">避让晚</button>
-<button class="btn btn-red" onclick="addLog('避让未提示')">避让未提示</button>
-<button class="btn btn-red" onclick="addLog('未避让')">未避让</button>
+<h4>🔴ACC问题</h4>
+<div class="event-row">
+<select id="selAcc">
+<option value="">--选择ACC问题--</option>
+<option value="未制动">未制动</option>
+<option value="动力不足">动力不足</option>
+<option value="超速">超速</option>
+<option value="异常制动">异常制动</option>
+</select>
+<input type="checkbox" id="tteAcc">
+<label for="tteAcc">TTE</label>
+<button class="btn btn-red" onclick="addLogFromSelect('selAcc','tteAcc')">记录</button>
+</div>
 </div>
 
 <div>
-<h4>🔴换道问题（红色）</h4>
-<button class="btn btn-red" onclick="addLog('拨杆换道失败')">拨杆换道失败</button>
-<button class="btn btn-red" onclick="addLog('自动换道失败')">自动换道失败</button>
+<h4>🔴避让问题</h4>
+<div class="event-row">
+<select id="selAvoid">
+<option value="">--选择避让问题--</option>
+<option value="避让晚">避让晚</option>
+<option value="避让未提示">避让未提示</option>
+<option value="未避让">未避让</option>
+<option value="避让压线">避让压线</option>
+<option value="避让播报延迟">避让播报延迟</option>
+</select>
+<input type="checkbox" id="tteAvoid">
+<label for="tteAvoid">TTE</label>
+<button class="btn btn-red" onclick="addLogFromSelect('selAvoid','tteAvoid')">记录</button>
+</div>
 </div>
 
 <div>
-<h4>🔴匝道问题（红色，风险最高）</h4>
-<button class="btn btn-red" onclick="addLog('匝道压线')">匝道压线</button>
-<button class="btn btn-red" onclick="addLog('匝道前不减速')">匝道前不减速</button>
-<button class="btn btn-red" onclick="addLog('匝道内行驶左侧车道')">匝道内行驶左侧车道</button>
-<button class="btn btn-red" onclick="addLog('出匝道未避让')">出匝道未避让</button>
-<button class="btn btn-red" onclick="addLog('匝道转向不足')">匝道转向不足</button>
+<h4>🔴换道问题</h4>
+<div class="event-row">
+<select id="selLc">
+<option value="">--选择换道问题--</option>
+<option value="拨杆换道失败">拨杆换道失败</option>
+<option value="自动换道失败">自动换道失败</option>
+</select>
+<input type="checkbox" id="tteLc">
+<label for="tteLc">TTE</label>
+<button class="btn btn-red" onclick="addLogFromSelect('selLc','tteLc')">记录</button>
+</div>
 </div>
 
 <div>
-<h4>🔔介入事件（填写具体原因）</h4>
-<button class="btn btn-red" onclick="addIntervene('安全介入')">安全介入</button>
-<button class="btn btn-gray" onclick="addIntervene('非安全介入')">非安全介入</button>
+<h4>🔴匝道问题</h4>
+<div class="event-row">
+<select id="selRamp">
+<option value="">--选择匝道问题--</option>
+<option value="匝道压线">匝道压线</option>
+<option value="匝道前不减速">匝道前不减速</option>
+<option value="匝道内行驶左侧车道">匝道内行驶左侧车道</option>
+<option value="出匝道未避让">出匝道未避让</option>
+<option value="匝道转向不足">匝道转向不足</option>
+<option value="匝道转向过度">匝道转向过度</option>
+<option value="匝道画龙">匝道画龙</option>
+<option value="匝道入口不自动汇入">匝道入口不自动汇入</option>
+<option value="匝道速度过快">匝道速度过快</option>
+<option value="匝道速度过慢">匝道速度过慢</option>
+</select>
+<input type="checkbox" id="tteRamp">
+<label for="tteRamp">TTE</label>
+<button class="btn btn-red" onclick="addLogFromSelect('selRamp','tteRamp')">记录</button>
+</div>
+</div>
+
+<div>
+<h4>🔔介入事件</h4>
+<div class="btn-line">
+<input type="checkbox" id="tteIntervene1">
+<label for="tteIntervene1">TTE</label>
+<button class="btn btn-red" onclick="addInterveneLog('安全介入','tteIntervene1')">安全介入</button>
+
+<input type="checkbox" id="tteIntervene2">
+<label for="tteIntervene2">TTE</label>
+<button class="btn btn-red" onclick="addInterveneLog('非安全介入','tteIntervene2')">非安全介入</button>
+</div>
 </div>
 
 <div>
 <h4>其他自定义问题</h4>
-<input id="otherInput" class="input-full" placeholder="自行填写事件描述">
-<button class="btn btn-red" onclick="addOtherLog()">其他问题(保留时间)</button>
+<div class="event-row">
+<input id="otherInput" placeholder="自行填写事件描述">
+<input type="checkbox" id="tteOther">
+<label for="tteOther">TTE</label>
+<button class="btn btn-red" onclick="addOtherLogFromSelect()">记录自定义</button>
+</div>
 </div>
 
 <div style="margin:10px 0;">
@@ -104,7 +192,6 @@ h4{margin:0;font-size:16px;}
 <button class="btn btn-red" onclick="clearLocalLog()">清空本地日志</button>
 </div>
 </div>
-
 <div class="box">
 <div class="title-row">
 <h4>📝原始日志输出（自动本地持久化）</h4>
@@ -112,15 +199,13 @@ h4{margin:0;font-size:16px;}
 </div>
 <textarea id="logArea"></textarea>
 </div>
-
 <div class="box">
 <div class="title-row">
 <h4>📌主要问题点（手动编辑填写，自动保存）</h4>
-<button class="btn btn-blue" onclick="copyLogAndIssue()">复制日志+主要问题</button>
+<button class="btn btn-blue" onclick="copyIssue()">复制主要问题</button>
 </div>
 <textarea id="issueArea" placeholder="在这里填写本次路测总结、主要问题、复现条件、现象描述等"></textarea>
 </div>
-
 <div class="box">
 <div class="title-row">
 <h4>📊完整路测统计（点击刷新完整统计）</h4>
@@ -128,42 +213,84 @@ h4{margin:0;font-size:16px;}
 </div>
 <div class="stat" id="statBox"></div>
 </div>
-
 <script>
 //本地存储KEY
 const STORAGE_KEY_LOG = "noa_log_content";
 const STORAGE_KEY_ISSUE = "noa_issue_content";
-const STORAGE_KEY_INFO = "noa_test_info";
+const STORAGE_KEY_DATE = "noa_test_date";
+const STORAGE_KEY_CAR = "noa_test_car";
+const STORAGE_KEY_WEIGHT = "noa_test_weight";
+const STORAGE_KEY_WEATHER = "noa_test_weather";
 const STORAGE_KEY_MILE = "noa_total_mile";
+const STORAGE_KEY_ROUTE = "noa_route_text";
+
+// 获取当前日期字符串 yyyy-MM-dd
+function getTodayStr(){
+    const d=new Date();
+    const y=d.getFullYear();
+    const m=(d.getMonth()+1).toString().padStart(2,'0');
+    const day=d.getDate().toString().padStart(2,'0');
+    return `${y}-${m}-${day}`;
+}
+//获取日志头部信息文本
+function getLogHeaderText(){
+    const dateVal = document.getElementById('testDate').value;
+    const carVal = document.getElementById('testCar').value;
+    const weightVal = document.getElementById('testWeight').value;
+    const weatherVal = document.getElementById('testWeather').value;
+    const routeVal = document.getElementById('routeText').value;
+    const dateShow = dateVal.replace(/(\d{4})-(\d{2})-(\d{2})/, "$1年$2月$3日");
+    return `${dateShow}，${carVal} ${weightVal},${weatherVal}，${routeVal}`;
+}
 
 //页面加载读取本地存储
 window.onload = function(){
     const saveLog = localStorage.getItem(STORAGE_KEY_LOG);
     const saveIssue = localStorage.getItem(STORAGE_KEY_ISSUE);
-    const saveInfo = localStorage.getItem(STORAGE_KEY_INFO);
+    const saveDate = localStorage.getItem(STORAGE_KEY_DATE);
+    const saveCar = localStorage.getItem(STORAGE_KEY_CAR);
+    const saveWeight = localStorage.getItem(STORAGE_KEY_WEIGHT);
+    const saveWeather = localStorage.getItem(STORAGE_KEY_WEATHER);
     const saveMile = localStorage.getItem(STORAGE_KEY_MILE);
+    const saveRoute = localStorage.getItem(STORAGE_KEY_ROUTE);
+
+    // 本地存储优先，没有则使用预设默认值
+    document.getElementById('testDate').value = saveDate || getTodayStr();
+    document.getElementById('testCar').value = saveCar || "377车";
+    document.getElementById('testWeight').value = saveWeight || "40t";
+    document.getElementById('testWeather').value = saveWeather || "晴天";
+    document.getElementById('totalMile').value = saveMile || "300";
+    document.getElementById('routeText').value = saveRoute || "永乐东-腰市";
+
     if(saveLog!==null) document.getElementById('logArea').value = saveLog;
     if(saveIssue!==null) document.getElementById('issueArea').value = saveIssue;
-    if(saveInfo!==null) document.getElementById('testInfo').value = saveInfo;
-    if(saveMile!==null) document.getElementById('totalMile').value = saveMile;
 
-    //监听输入框，自动保存测试信息、里程
-    document.getElementById('testInfo').addEventListener('input',()=>{
-        localStorage.setItem(STORAGE_KEY_INFO,document.getElementById('testInfo').value);
+    //监听输入变更自动保存
+    document.getElementById('testDate').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_DATE,document.getElementById('testDate').value);
+    })
+    document.getElementById('testCar').addEventListener('change',()=>{
+        localStorage.setItem(STORAGE_KEY_CAR,document.getElementById('testCar').value);
+    })
+    document.getElementById('testWeight').addEventListener('change',()=>{
+        localStorage.setItem(STORAGE_KEY_WEIGHT,document.getElementById('testWeight').value);
+    })
+    document.getElementById('testWeather').addEventListener('change',()=>{
+        localStorage.setItem(STORAGE_KEY_WEATHER,document.getElementById('testWeather').value);
     })
     document.getElementById('totalMile').addEventListener('input',()=>{
         localStorage.setItem(STORAGE_KEY_MILE,document.getElementById('totalMile').value);
     })
-    //监听文本框变化，自动保存日志
+    document.getElementById('routeText').addEventListener('input',()=>{
+        localStorage.setItem(STORAGE_KEY_ROUTE,document.getElementById('routeText').value);
+    })
     document.getElementById('logArea').addEventListener('input',()=>{
         localStorage.setItem(STORAGE_KEY_LOG,document.getElementById('logArea').value);
     })
-    //监听主要问题框，自动持久化
     document.getElementById('issueArea').addEventListener('input',()=>{
         localStorage.setItem(STORAGE_KEY_ISSUE,document.getElementById('issueArea').value);
     })
 }
-
 // 获取当前时分秒
 function getNowTime(){
 let d=new Date();
@@ -172,60 +299,73 @@ let m=d.getMinutes().toString().padStart(2,'0');
 let s=d.getSeconds().toString().padStart(2,'0');
 return `${h}:${m}:${s}`;
 }
-
 // 追加文本到日志框
 function appendLogLine(line){
 const ta=document.getElementById('logArea');
-let info=document.getElementById('testInfo').value.trim();
 let currentText=ta.value;
-if(currentText==="" && info){
-    currentText = info + "\n";
+// 如果日志为空，先写入头部信息
+if(currentText.trim() === ""){
+    currentText = getLogHeaderText() + "\n";
 }
 if(currentText!=="" && !currentText.endsWith("\n")) currentText+="\n";
 ta.value = currentText + line;
-//写入本地存储
 localStorage.setItem(STORAGE_KEY_LOG,ta.value);
 }
 
-//普通按钮事件
-function addLog(eventName){
-const time=getNowTime();
-const tteChecked=document.getElementById('tteCheck').checked;
-let line=`${time} ${eventName}`;
-if(tteChecked){
-line += ` tte`;
-document.getElementById('tteCheck').checked = false;
-}
-appendLogLine(line);
+//正常事件按钮点击（无TTE）
+function addNormalLog(eventName){
+    const time=getNowTime();
+    let line=`${time} ${eventName}`;
+    appendLogLine(line);
 }
 
-//安全/非安全介入，弹窗输入原因
-function addIntervene(typeName){
-let reason = prompt(`请输入${typeName}具体原因：`,"");
-if(reason===null) return;
-const time=getNowTime();
-const tteChecked=document.getElementById('tteCheck').checked;
-let line=`${time} ${typeName}：${reason.trim()}`;
-if(tteChecked){
-line += ` tte`;
-document.getElementById('tteCheck').checked = false;
-}
-appendLogLine(line);
+//介入事件按钮点击（独立TTE）
+function addInterveneLog(typeName, tteId){
+    const tteCb = document.getElementById(tteId);
+    let reason = prompt(`请输入${typeName}具体原因：`,"");
+    if(reason===null) return;
+    const time=getNowTime();
+    let line=`${time} ${typeName}：${reason.trim()}`;
+    if(tteCb.checked){
+        line += ` tte`;
+        tteCb.checked = false;
+    }
+    appendLogLine(line);
 }
 
-//自定义其他问题
-function addOtherLog(){
-const text=document.getElementById('otherInput').value.trim();
-if(!text){alert("请输入其他问题描述");return;}
-const time=getNowTime();
-const tteChecked=document.getElementById('tteCheck').checked;
-let line=`${time} ${text}`;
-if(tteChecked){
-line += ` tte`;
-document.getElementById('tteCheck').checked = false;
+//从下拉选择添加日志
+function addLogFromSelect(selId,tteId){
+    const sel = document.getElementById(selId);
+    const tteCb = document.getElementById(tteId);
+    const eventName = sel.value.trim();
+    if(!eventName){
+        alert("请先选择事件");
+        return;
+    }
+    const time=getNowTime();
+    let line=`${time} ${eventName}`;
+    if(tteCb.checked){
+        line += ` tte`;
+        tteCb.checked = false;
+    }
+    appendLogLine(line);
+    sel.value = "";
 }
-appendLogLine(line);
-document.getElementById('otherInput').value='';
+
+//自定义事件
+function addOtherLogFromSelect(){
+    const input = document.getElementById('otherInput');
+    const tteCb = document.getElementById('tteOther');
+    const text=input.value.trim();
+    if(!text){alert("请输入其他问题描述");return;}
+    const time=getNowTime();
+    let line=`${time} ${text}`;
+    if(tteCb.checked){
+        line += ` tte`;
+        tteCb.checked = false;
+    }
+    appendLogLine(line);
+    input.value='';
 }
 
 //清空本地全部日志+问题点
@@ -236,8 +376,7 @@ document.getElementById('issueArea').value = "";
 localStorage.removeItem(STORAGE_KEY_LOG);
 localStorage.removeItem(STORAGE_KEY_ISSUE);
 }
-
-//复制全部日志：读取textarea完整value
+//复制全部日志
 async function copyLog(){
 const text = document.getElementById('logArea').value;
 if(!text || text.trim() === ""){
@@ -251,25 +390,21 @@ alert("✅全部原始日志已复制");
 alert("❌复制失败，请浏览器允许剪贴板权限，可以手动全选拷贝");
 }
 }
-
-//复制【日志 + 主要问题点】合并输出
-async function copyLogAndIssue(){
-const logText = document.getElementById('logArea').value;
-const issueText = document.getElementById('issueArea').value;
-let combineText = "";
-combineText += "=====原始日志=====\n";
-combineText += logText;
-combineText += "\n\n=====主要问题点=====\n";
-combineText += issueText;
+//复制主要问题点（单独）
+async function copyIssue(){
+const text = document.getElementById('issueArea').value;
+if(!text || text.trim() === ""){
+alert("主要问题点为空，无法复制");
+return;
+}
 try{
-await navigator.clipboard.writeText(combineText);
-alert("✅日志+主要问题点已一并复制");
+await navigator.clipboard.writeText(text);
+alert("✅主要问题点已复制");
 }catch(err){
-alert("❌复制失败，可以手动全选拷贝文本");
+alert("❌复制失败，可以手动全选拷贝");
 }
 }
-
-//复制路测统计：读取statBox完整innerText
+//复制路测统计
 async function copyStatText(){
 const statText = document.getElementById('statBox').innerText;
 if(!statText || statText.trim() === ""){
@@ -284,66 +419,72 @@ alert("❌复制失败，可以手动全选拷贝统计文本");
 }
 }
 
-//统计计算：完全读取textarea原始文本，手动写的日志同样统计
+//统计计算：使用你给的模板格式输出
 function calcStat(){
 const rawText=document.getElementById('logArea').value;
 const mileInput=parseFloat(document.getElementById('totalMile').value);
 const mile = isNaN(mileInput) || mileInput <=0 ? 0 : mileInput;
-const lines = rawText.split('\n');
+const dateStr = document.getElementById('testDate').value;
+const carStr = document.getElementById('testCar').value;
+const weightStr = document.getElementById('testWeight').value;
+const weatherStr = document.getElementById('testWeather').value;
+const routeStr = document.getElementById('routeText').value || "未填写";
 
+let dateShow = dateStr.replace(/(\d{4})-(\d{2})-(\d{2})/, "$1年$2月$3日");
+
+const lines = rawText.split('\n');
 let cnt={
 safeIntervene:0,
 unSafeIntervene:0,
-dragon:0,
+lccDragon:0,
 ilcOk:0,ilcFail:0,
 alcOk:0,alcFail:0,
-accBadBrake:0,
+accErrBrake:0,
 avoidOk:0,avoidFail:0,
 tunnelOk:0,tunnelFail:0,
 rampOk:0,rampFail:0
 };
-
 lines.forEach(line=>{
 const l=line.trim();
 if(!l) return;
 if(l.includes("安全介入")) cnt.safeIntervene++;
 if(l.includes("非安全介入")) cnt.unSafeIntervene++;
-if(l.includes("画龙")) cnt.dragon++;
+if(l.includes("画龙") || l.includes("LCC持续偏右") || l.includes("LCC持续偏左")) cnt.lccDragon++;
 if(l.includes("正常拨杆换道")) cnt.ilcOk++;
 if(l.includes("拨杆换道失败")) cnt.ilcFail++;
 if(l.includes("正常自动换道")) cnt.alcOk++;
 if(l.includes("自动换道失败")) cnt.alcFail++;
-if(l.includes("异常制动")) cnt.accBadBrake++;
+if(l.includes("异常制动")) cnt.accErrBrake++;
 if(l.includes("正常避让")) cnt.avoidOk++;
-if(l.includes("避让晚")||l.includes("避让未提示")||l.includes("未避让")) cnt.avoidFail++;
+if(l.includes("避让晚")||l.includes("避让未提示")||l.includes("未避让")||l.includes("避让压线")||l.includes("避让播报延迟")) cnt.avoidFail++;
 if(l.includes("通过隧道")) cnt.tunnelOk++;
 if(l.includes("通过匝道")) cnt.rampOk++;
-if(l.includes("匝道压线")||l.includes("匝道前不减速")||l.includes("匝道内行驶左侧车道")||l.includes("出匝道未避让")||l.includes("匝道转向不足")) cnt.rampFail++;
+if(l.includes("匝道压线")||l.includes("匝道前不减速")||l.includes("匝道内行驶左侧车道")||l.includes("出匝道未避让")||l.includes("匝道转向不足")
+||l.includes("匝道转向过度")||l.includes("匝道画龙")||l.includes("匝道入口不自动汇入")||l.includes("匝道速度过快")||l.includes("匝道速度过慢")) cnt.rampFail++;
 });
 
-//辅助函数
 function perK(count){
 if(mile<=0) return "-";
-return (count / mile *1000).toFixed(2);
+return (count / mile *1000).toFixed(1);
 }
 function rate(ok,fail){
 let total=ok+fail;
-if(total===0) return "-";
-return (ok/total*100).toFixed(2)+"%";
+if(total===0) return "100％";
+return (ok/total*100).toFixed(0)+"％";
 }
 
 let out="";
-out += `1. 总里程：${mile>0?mile:'未填写'} km\n`;
-out += `2. 安全介入次数：${cnt.safeIntervene}次，千公里指标：${perK(cnt.safeIntervene)} 次/千公里\n`;
-out += `3. 非安全介入次数：${cnt.unSafeIntervene}次，千公里指标：${perK(cnt.unSafeIntervene)} 次/千公里\n`;
-out += `4. 车道保持画龙：${cnt.dragon}次，千公里指标：${perK(cnt.dragon)} 次/千公里\n`;
-out += `5. 拨杆换道ILC：成功${cnt.ilcOk}次，失败${cnt.ilcFail}次，成功率：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
-out += `6. 自动换道ALC: 成功${cnt.alcOk}次，失败${cnt.alcFail}次，成功率：${rate(cnt.alcOk,cnt.alcFail)}\n`;
-out += `7. ACC异常制动：${cnt.accBadBrake}次，千公里指标：${perK(cnt.accBadBrake)} 次/千公里\n`;
-out += `8. 避让事件：成功${cnt.avoidOk}次，失败${cnt.avoidFail}次，避让成功率：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
-out += `9. 隧道场景：正常通行${cnt.tunnelOk}次，异常${cnt.tunnelFail}次\n`;
-out += `10.匝道场景：正常通行${cnt.rampOk}次，异常${cnt.rampFail}次\n`;
-
+out += `${dateShow}，${carStr} ${weightStr},${weatherStr}，${routeStr}\n`;
+out += `1. 总里程：${mile>0?mile:'未填写'}km\n`;
+out += `2. 安全介入次数：${cnt.safeIntervene}次，实际指标：${perK(cnt.safeIntervene)}次/千公里\n`;
+out += `3. 非安全介入次数：${cnt.unSafeIntervene}次，实际指标：${perK(cnt.unSafeIntervene)}次/千公里\n`;
+out += `4. 车道保持（画龙）：${cnt.lccDragon}次，实际指标：${perK(cnt.lccDragon)}次/千公里\n`;
+out += `5. 拨杆换道ILC：总共${cnt.ilcOk+cnt.ilcFail}次，失败${cnt.ilcFail}次，实际指标：${rate(cnt.ilcOk,cnt.ilcFail)}\n`;
+out += `6. 自动换道ALC: 总共${cnt.alcOk+cnt.alcFail}次，失败${cnt.alcFail}次，实际指标：${rate(cnt.alcOk,cnt.alcFail)}\n`;
+out += `7. 自适应巡航ACC: 误制动次数${cnt.accErrBrake}次，实际指标${perK(cnt.accErrBrake)}次/千公里\n`;
+out += `8. 智能避让：总共${cnt.avoidOk+cnt.avoidFail}次，失败${cnt.avoidFail}次，实际指标：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
+out += `9. 隧道通行成功率：总共${cnt.tunnelOk+cnt.tunnelFail}次，失败${cnt.tunnelFail}次，实际指标：${rate(cnt.tunnelOk,cnt.tunnelFail)}\n`;
+out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，实际指标：${rate(cnt.rampOk,cnt.rampFail)}。`;
 document.getElementById('statBox').innerText=out;
 }
 </script>
