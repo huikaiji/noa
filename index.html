@@ -13,6 +13,11 @@ body{max-width:980px;margin:12px auto;padding:10px;background:#f5f7fa;}
 .btn-red{background:#dd3b3b;color:white}
 textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 #issueArea{min-height:140px;}
+.confirm-overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;}
+.confirm-overlay[hidden]{display:none;}
+.confirm-dialog{width:min(100%,360px);background:#fff;border-radius:10px;padding:18px;box-shadow:0 8px 30px #0003;}
+.confirm-dialog p{line-height:1.6;margin:0 0 16px;}
+.confirm-actions{display:flex;justify-content:flex-end;gap:8px;}
 .input-row{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 .input-full{width:100%;}
@@ -26,6 +31,25 @@ h4{margin:0;font-size:16px;}
 </style>
 </head>
 <body>
+<div class="confirm-overlay" id="choiceEditor" hidden>
+  <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="choiceEditorTitle">
+    <p id="choiceEditorTitle">输入自定义内容</p>
+    <input id="choiceEditorInput" type="text" style="width:100%;margin:0 0 14px;" placeholder="请输入内容">
+    <div class="confirm-actions">
+      <button class="btn" type="button" onclick="cancelChoiceEdit()">取消</button>
+      <button class="btn btn-blue" type="button" onclick="saveChoiceEdit()">确定</button>
+    </div>
+  </div>
+</div>
+<div class="confirm-overlay" id="clearConfirm" hidden>
+  <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="clearConfirmTitle">
+    <p id="clearConfirmTitle">确认清空全部本地日志和主要问题点？此操作无法撤销。</p>
+    <div class="confirm-actions">
+      <button class="btn" type="button" onclick="cancelClearLocalLog()">取消</button>
+      <button class="btn btn-red" type="button" onclick="confirmClearLocalLog()">确认清空</button>
+    </div>
+  </div>
+</div>
 <div class="box">
 <h3>🚗 NOA路测事件记录仪</h3>
 <div class="input-row">
@@ -33,14 +57,17 @@ h4{margin:0;font-size:16px;}
 <input id="testDate" type="date">
 
 <label>车辆：</label>
-<select id="testCar">
+<select id="testCar" style="width:150px;" onchange="handleChoiceChange('testCar')">
 <option value="377车" selected>377车</option>
 <option value="382车">382车</option>
 <option value="383车">383车</option>
+<option value="251车">251车</option>
+<option value="725车">725车</option>
+<option value="__custom__">自定义输入…</option>
 </select>
 
 <label>重量：</label>
-<select id="testWeight">
+<select id="testWeight" style="width:120px;" onchange="handleChoiceChange('testWeight')">
 <option value="35t">35t</option>
 <option value="36t">36t</option>
 <option value="37t">37t</option>
@@ -48,6 +75,7 @@ h4{margin:0;font-size:16px;}
 <option value="39t">39t</option>
 <option value="40t" selected>40t</option>
 <option value="41t">41t</option>
+<option value="__custom__">自定义输入…</option>
 </select>
 
 <label>天气：</label>
@@ -75,6 +103,12 @@ h4{margin:0;font-size:16px;}
 <button class="btn btn-blue" onclick="addNormalLog('正常自动换道')">正常自动换道</button>
 <button class="btn btn-blue" onclick="addNormalLog('通过隧道')">通过隧道</button>
 <button class="btn btn-blue" onclick="addNormalLog('通过匝道')">通过匝道</button>
+<button class="btn btn-blue" onclick="addNormalLog('正常跟车')">正常跟车</button>
+<button class="btn btn-blue" onclick="addNormalLog('正常牵扯切入')">正常牵扯切入</button>
+<button class="btn btn-blue" onclick="addNormalLog('下坡→上坡')">下坡→上坡</button>
+<button class="btn btn-blue" onclick="addNormalLog('上坡→下坡')">上坡→下坡</button>
+<button class="btn btn-blue" onclick="addNormalLog('长上坡')">长上坡</button>
+<button class="btn btn-blue" onclick="addNormalLog('上下坡')">上下坡</button>
 </div>
 </div>
 
@@ -165,6 +199,29 @@ h4{margin:0;font-size:16px;}
 </div>
 
 <div>
+<h4>🔴纵向问题（道路形态可选）</h4>
+<div class="event-row">
+<select id="roadType" aria-label="道路形态">
+<option value="">--道路形态--</option>
+<option value="平原">平原</option>
+<option value="山区">山区</option>
+</select>
+<select id="longitudinalType" aria-label="纵向问题类型" onchange="updateLongitudinalIssues()">
+<option value="">--选择问题类型--</option>
+<option value="巡航">巡航</option>
+<option value="跟车">跟车</option>
+<option value="PCC">PCC</option>
+</select>
+<select id="longitudinalIssue" aria-label="纵向问题详情" disabled>
+<option value="">--先选择问题类型--</option>
+</select>
+<input type="checkbox" id="tteLongitudinal">
+<label for="tteLongitudinal">TTE</label>
+<button class="btn btn-red" onclick="addLongitudinalLog()">纵向记录</button>
+</div>
+</div>
+
+<div>
 <h4>🔔介入事件</h4>
 <div class="btn-line">
 <input type="checkbox" id="tteIntervene1">
@@ -235,8 +292,8 @@ function getTodayStr(){
 //获取日志头部信息文本
 function getLogHeaderText(){
     const dateVal = document.getElementById('testDate').value;
-    const carVal = document.getElementById('testCar').value;
-    const weightVal = document.getElementById('testWeight').value;
+    const carVal = getCarValue();
+    const weightVal = getWeightValue();
     const weatherVal = document.getElementById('testWeather').value;
     const routeVal = document.getElementById('routeText').value;
     const dateShow = dateVal.replace(/(\d{4})-(\d{2})-(\d{2})/, "$1年$2月$3日");
@@ -256,8 +313,8 @@ window.onload = function(){
 
     // 本地存储优先，没有则使用预设默认值
     document.getElementById('testDate').value = saveDate || getTodayStr();
-    document.getElementById('testCar').value = saveCar || "377车";
-    document.getElementById('testWeight').value = saveWeight || "40t";
+    setSavedChoice('testCar', saveCar || "377车");
+    setSavedChoice('testWeight', saveWeight || "40t");
     document.getElementById('testWeather').value = saveWeather || "晴天";
     document.getElementById('totalMile').value = saveMile || "300";
     document.getElementById('routeText').value = saveRoute || "永乐东-腰市";
@@ -268,12 +325,6 @@ window.onload = function(){
     //监听输入变更自动保存
     document.getElementById('testDate').addEventListener('input',()=>{
         localStorage.setItem(STORAGE_KEY_DATE,document.getElementById('testDate').value);
-    })
-    document.getElementById('testCar').addEventListener('change',()=>{
-        localStorage.setItem(STORAGE_KEY_CAR,document.getElementById('testCar').value);
-    })
-    document.getElementById('testWeight').addEventListener('change',()=>{
-        localStorage.setItem(STORAGE_KEY_WEIGHT,document.getElementById('testWeight').value);
     })
     document.getElementById('testWeather').addEventListener('change',()=>{
         localStorage.setItem(STORAGE_KEY_WEATHER,document.getElementById('testWeather').value);
@@ -291,6 +342,79 @@ window.onload = function(){
         localStorage.setItem(STORAGE_KEY_ISSUE,document.getElementById('issueArea').value);
     })
 }
+// 单个下拉框提供预设值；自定义内容通过页面内编辑框添加到下拉选项
+let activeChoiceId = null;
+let lastCarValue = "377车";
+let lastWeightValue = "40t";
+function setSavedChoice(selectId, savedValue){
+    const select = document.getElementById(selectId);
+    if(!Array.from(select.options).some(option => option.value === savedValue)){
+        const customOption = document.createElement('option');
+        customOption.value = savedValue;
+        customOption.textContent = savedValue;
+        select.insertBefore(customOption, select.options[select.options.length - 1]);
+    }
+    select.value = savedValue;
+    if(selectId === 'testCar') lastCarValue = savedValue;
+    else lastWeightValue = savedValue;
+}
+function handleChoiceChange(selectId){
+    const select = document.getElementById(selectId);
+    if(select.value === '__custom__'){
+        activeChoiceId = selectId;
+        const isCar = selectId === 'testCar';
+        document.getElementById('choiceEditorTitle').textContent = isCar ? '输入自定义车辆' : '输入自定义重量';
+        const input = document.getElementById('choiceEditorInput');
+        input.value = '';
+        input.placeholder = isCar ? '例如：277车' : '例如：42t';
+        document.getElementById('choiceEditor').hidden = false;
+        input.focus();
+        return;
+    }
+    if(selectId === 'testCar'){
+        lastCarValue = select.value;
+        saveCarValue();
+    }else{
+        lastWeightValue = select.value;
+        saveWeightValue();
+    }
+}
+function saveChoiceEdit(){
+    let value = document.getElementById('choiceEditorInput').value.trim();
+    if(!value){ alert('请输入自定义内容'); return; }
+    if(activeChoiceId === 'testCar' && !value.endsWith('车')) value += '车';
+    if(activeChoiceId === 'testWeight' && !/t$/i.test(value)) value += 't';
+    const select = document.getElementById(activeChoiceId);
+    let option = Array.from(select.options).find(item => item.value === value);
+    if(!option){
+        option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.insertBefore(option, select.options[select.options.length - 1]);
+    }
+    select.value = value;
+    if(activeChoiceId === 'testCar'){
+        lastCarValue = value;
+        saveCarValue();
+    }else{
+        lastWeightValue = value;
+        saveWeightValue();
+    }
+    document.getElementById('choiceEditor').hidden = true;
+    activeChoiceId = null;
+}
+function cancelChoiceEdit(){
+    if(activeChoiceId){
+        document.getElementById(activeChoiceId).value = activeChoiceId === 'testCar' ? lastCarValue : lastWeightValue;
+    }
+    document.getElementById('choiceEditor').hidden = true;
+    activeChoiceId = null;
+}
+function getCarValue(){ return document.getElementById('testCar').value; }
+function getWeightValue(){ return document.getElementById('testWeight').value; }
+function saveCarValue(){ localStorage.setItem(STORAGE_KEY_CAR, getCarValue()); }
+function saveWeightValue(){ localStorage.setItem(STORAGE_KEY_WEIGHT, getWeightValue()); }
+
 // 获取当前时分秒
 function getNowTime(){
 let d=new Date();
@@ -333,6 +457,52 @@ function addInterveneLog(typeName, tteId){
     appendLogLine(line);
 }
 
+// 根据巡航、跟车或PCC类型更新纵向问题二级选项
+const longitudinalIssues = {
+    "巡航": ["下坡超速", "弯道超速", "异常掉空档", "速度低于设定值", "动力不足", "加速过猛", "速度反复波动", "异常制动", "制动过晚", "制动过猛", "顿挫"],
+    "跟车": ["跟车距离过近", "跟车距离过远", "跟车速度波动", "前车减速响应晚", "跟车制动过猛", "跟车过近未制动", "前车切入响应晚", "前车切入制动过猛", "前车切出加速恢复慢"],
+    "PCC": ["下坡接上坡冲坡不足", "上坡接下坡超限速"]
+};
+function updateLongitudinalIssues(){
+    const type = document.getElementById('longitudinalType').value;
+    const issueSelect = document.getElementById('longitudinalIssue');
+    issueSelect.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = type ? `--选择${type}问题--` : '--先选择问题类型--';
+    issueSelect.appendChild(placeholder);
+    (longitudinalIssues[type] || []).forEach(issue => {
+        const option = document.createElement('option');
+        option.value = issue;
+        option.textContent = issue;
+        issueSelect.appendChild(option);
+    });
+    issueSelect.disabled = !type;
+}
+function addLongitudinalLog(){
+    const road = document.getElementById('roadType').value;
+    const type = document.getElementById('longitudinalType').value;
+    const issue = document.getElementById('longitudinalIssue').value;
+    if(!road && (!type || !issue)){
+        alert('请选择道路形态，或选择问题类型和具体问题后记录');
+        return;
+    }
+    if(type && !issue){ alert('请先选择具体问题'); return; }
+    const tteCb = document.getElementById('tteLongitudinal');
+    let eventText;
+    if(type && issue){
+        eventText = `${road ? road + '-' : ''}${type}-${issue}`;
+    }else{
+        eventText = `道路形态：${road}`;
+    }
+    let line = `${getNowTime()} ${eventText}`;
+    if(tteCb.checked){ line += ' tte'; tteCb.checked = false; }
+    appendLogLine(line);
+    document.getElementById('roadType').value = '';
+    document.getElementById('longitudinalType').value = '';
+    updateLongitudinalIssues();
+}
+
 //从下拉选择添加日志
 function addLogFromSelect(selId,tteId){
     const sel = document.getElementById(selId);
@@ -368,13 +538,19 @@ function addOtherLogFromSelect(){
     input.value='';
 }
 
-//清空本地全部日志+问题点
+// 使用页面内确认框，避免嵌入式浏览器屏蔽原生 confirm 对话框
 function clearLocalLog(){
-if(!confirm("确认清空全部本地日志+主要问题点？数据将无法恢复！")) return;
-document.getElementById('logArea').value = "";
-document.getElementById('issueArea').value = "";
-localStorage.removeItem(STORAGE_KEY_LOG);
-localStorage.removeItem(STORAGE_KEY_ISSUE);
+    document.getElementById('clearConfirm').hidden = false;
+}
+function cancelClearLocalLog(){
+    document.getElementById('clearConfirm').hidden = true;
+}
+function confirmClearLocalLog(){
+    document.getElementById('logArea').value = "";
+    document.getElementById('issueArea').value = "";
+    localStorage.removeItem(STORAGE_KEY_LOG);
+    localStorage.removeItem(STORAGE_KEY_ISSUE);
+    document.getElementById('clearConfirm').hidden = true;
 }
 //复制全部日志
 async function copyLog(){
@@ -425,8 +601,8 @@ const rawText=document.getElementById('logArea').value;
 const mileInput=parseFloat(document.getElementById('totalMile').value);
 const mile = isNaN(mileInput) || mileInput <=0 ? 0 : mileInput;
 const dateStr = document.getElementById('testDate').value;
-const carStr = document.getElementById('testCar').value;
-const weightStr = document.getElementById('testWeight').value;
+const carStr = getCarValue();
+const weightStr = getWeightValue();
 const weatherStr = document.getElementById('testWeather').value;
 const routeStr = document.getElementById('routeText').value || "未填写";
 
@@ -442,14 +618,19 @@ alcOk:0,alcFail:0,
 accErrBrake:0,
 avoidOk:0,avoidFail:0,
 tunnelOk:0,tunnelFail:0,
-rampOk:0,rampFail:0
+rampOk:0,rampFail:0,
+cruiseIssue:0,followingIssue:0,pccIssue:0
 };
 lines.forEach(line=>{
 const l=line.trim();
 if(!l) return;
 if(l.includes("安全介入")) cnt.safeIntervene++;
 if(l.includes("非安全介入")) cnt.unSafeIntervene++;
-if(l.includes("画龙") || l.includes("LCC持续偏右") || l.includes("LCC持续偏左")) cnt.lccDragon++;
+const eventText = l.replace(/^\d{2}:\d{2}:\d{2}\s*/, "").replace(/\s+tte\s*$/i, "").trim();
+if(eventText === "画龙") cnt.lccDragon++;
+if(/^(?:(?:平原|山区)-)?巡航-/.test(eventText)) cnt.cruiseIssue++;
+if(/^(?:(?:平原|山区)-)?跟车-/.test(eventText)) cnt.followingIssue++;
+if(/^(?:(?:平原|山区)-)?PCC-/.test(eventText)) cnt.pccIssue++;
 if(l.includes("正常拨杆换道")) cnt.ilcOk++;
 if(l.includes("拨杆换道失败")) cnt.ilcFail++;
 if(l.includes("正常自动换道")) cnt.alcOk++;
@@ -484,7 +665,11 @@ out += `6. 自动换道ALC: 总共${cnt.alcOk+cnt.alcFail}次，失败${cnt.alcF
 out += `7. 自适应巡航ACC: 误制动次数${cnt.accErrBrake}次，实际指标${perK(cnt.accErrBrake)}次/千公里\n`;
 out += `8. 智能避让：总共${cnt.avoidOk+cnt.avoidFail}次，失败${cnt.avoidFail}次，实际指标：${rate(cnt.avoidOk,cnt.avoidFail)}\n`;
 out += `9. 隧道通行成功率：总共${cnt.tunnelOk+cnt.tunnelFail}次，失败${cnt.tunnelFail}次，实际指标：${rate(cnt.tunnelOk,cnt.tunnelFail)}\n`;
-out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，实际指标：${rate(cnt.rampOk,cnt.rampFail)}。`;
+out += `10. 匝道辅助: 总共${cnt.rampOk+cnt.rampFail}次，失败${cnt.rampFail}次，实际指标：${rate(cnt.rampOk,cnt.rampFail)}\n`;
+out += `11. 纵向控制问题统计：\n`;
+out += `   巡航问题：${cnt.cruiseIssue}次，${perK(cnt.cruiseIssue)}次/千公里\n`;
+out += `   跟车问题：${cnt.followingIssue}次，${perK(cnt.followingIssue)}次/千公里\n`;
+out += `   PCC问题：${cnt.pccIssue}次，${perK(cnt.pccIssue)}次/千公里`;
 document.getElementById('statBox').innerText=out;
 }
 </script>
