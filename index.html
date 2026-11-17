@@ -19,22 +19,23 @@ textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px soli
 .confirm-dialog p{line-height:1.6;margin:0 0 16px;}
 .confirm-actions{display:flex;justify-content:flex-end;gap:8px;}
 .input-row{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.meta-grid{display:grid;gap:8px 10px;margin:8px 0;align-items:end}
-.meta-primary{grid-template-columns:repeat(4,minmax(0,1fr))}
-.meta-secondary{grid-template-columns:minmax(110px,1fr) minmax(0,2fr)}
-.field{min-width:0;display:flex;flex-direction:column;gap:3px}
-.field label{font-size:12px;color:#555;white-space:nowrap}
+.meta-grid{display:grid;gap:8px;margin:8px 0;align-items:center}
+.form-pair{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+.field-inline{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px}
+.field-wide{grid-template-columns:minmax(100px,auto) minmax(0,1fr)}
+.field label{font-size:13px;color:#555;white-space:nowrap}
 select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
-.field input,.field select{width:100%;min-width:0;height:36px;margin:0}
+.field input,.field select{width:100%;min-width:0;max-width:100%;height:36px;margin:0}
 @media(max-width:600px){
   body{margin:0 auto;padding:8px}
   .box{padding:12px;margin-bottom:9px}
-  .meta-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .field-date,.field-car{grid-column:1/-1}
-  .meta-secondary{grid-template-columns:minmax(105px,0.8fr) minmax(0,1.5fr)}
-  .meta-grid{gap:7px 8px}
+  .form-pair{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:7px}
+  .meta-grid{gap:7px}
+  .field-inline{gap:5px}
   .field label{font-size:12px}
+  .field-wide{grid-template-columns:105px minmax(0,1fr)}
   .field input,.field select{font-size:14px;padding:6px}
+  input[type="date"]{min-width:0;letter-spacing:-.3px}
   h3{font-size:18px;margin:4px 0 10px}
 }
 .input-full{width:100%;}
@@ -74,11 +75,10 @@ h4{margin:0;font-size:16px;}
 </div>
 <div class="box">
 <h3>🚗 NOA路测事件记录仪</h3>
-<div class="meta-grid meta-primary">
-<div class="field field-date"><label for="testDate">日期</label>
+<div class="meta-grid form-pair">
+<div class="field field-inline"><label for="testDate">日期</label>
 <input id="testDate" type="date"></div>
-
-<div class="field field-car"><label for="testCar">车辆</label>
+<div class="field field-inline"><label for="testCar">车辆</label>
 <select id="testCar" onchange="handleChoiceChange('testCar')">
 <option value="377车" selected>377车</option>
 <option value="382车">382车</option>
@@ -87,8 +87,9 @@ h4{margin:0;font-size:16px;}
 <option value="725车">725车</option>
 <option value="__custom__">自定义输入…</option>
 </select></div>
-
-<div class="field"><label for="testWeight">重量</label>
+</div>
+<div class="meta-grid form-pair">
+<div class="field field-inline"><label for="testWeight">重量</label>
 <select id="testWeight" onchange="handleChoiceChange('testWeight')">
 <option value="35t">35t</option>
 <option value="36t">36t</option>
@@ -99,8 +100,7 @@ h4{margin:0;font-size:16px;}
 <option value="41t">41t</option>
 <option value="__custom__">自定义输入…</option>
 </select></div>
-
-<div class="field"><label for="testWeather">天气</label>
+<div class="field field-inline"><label for="testWeather">天气</label>
 <select id="testWeather">
 <option value="晴天" selected>晴天</option>
 <option value="阴天">阴天</option>
@@ -108,11 +108,13 @@ h4{margin:0;font-size:16px;}
 <option value="夜间">夜间</option>
 </select></div>
 </div>
-<div class="meta-grid meta-secondary">
-<div class="field"><label for="totalMile">总里程（km）</label>
-<input id="totalMile" type="number" placeholder="例如300" value="300"></div>
-<div class="field"><label for="routeText">路线</label>
-<input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市"></div>
+<div class="meta-grid field field-inline field-wide">
+<label for="totalMile">总里程（km）</label>
+<input id="totalMile" type="number" placeholder="例如300" value="300">
+</div>
+<div class="meta-grid field field-inline field-wide">
+<label for="routeText">路线</label>
+<input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市">
 </div>
 
 <p>正常事件下拉选择后点击蓝色按钮记录（无TTE）；其余问题事件选择后可勾选本行TTE再记录；日志自动本地保存</p>
