@@ -20,7 +20,7 @@ textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px soli
 .confirm-actions{display:flex;justify-content:flex-end;gap:8px;}
 .input-row{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .meta-grid{display:grid;gap:8px;margin:8px 0;align-items:center}
-.form-pair{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+.form-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .field-inline{min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px}
 .field-wide{grid-template-columns:minmax(100px,auto) minmax(0,1fr)}
 .field label{font-size:13px;color:#555;white-space:nowrap}
@@ -32,13 +32,13 @@ select,input,textarea{
 @media(max-width:600px){
   body{margin:0 auto;padding:8px}
   .box{padding:12px;margin-bottom:9px}
-  .form-pair{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:7px}
+  .form-pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
   .meta-grid{gap:7px}
   .field-inline{gap:5px}
   .field label{font-size:12px}
   .field-wide{grid-template-columns:105px minmax(0,1fr)}
   .field input,.field select{font-size:14px;padding:6px}
-  input[type="date"]{min-width:0;letter-spacing:-.3px}
+  input[type="date"]{width:100%;min-width:0;max-width:100%;letter-spacing:-.3px}
   h3{font-size:18px;margin:4px 0 10px}
 }
 .input-full{width:100%;}
