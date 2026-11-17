@@ -19,7 +19,23 @@ textarea{width:100%;min-height:260px;padding:10px;font-size:14px;border:1px soli
 .confirm-dialog p{line-height:1.6;margin:0 0 16px;}
 .confirm-actions{display:flex;justify-content:flex-end;gap:8px;}
 .input-row{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.meta-grid{display:grid;gap:8px 10px;margin:8px 0;align-items:end}
+.meta-primary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.meta-secondary{grid-template-columns:minmax(110px,1fr) minmax(0,2fr)}
+.field{min-width:0;display:flex;flex-direction:column;gap:3px}
+.field label{font-size:12px;color:#555;white-space:nowrap}
 select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
+.field input,.field select{width:100%;min-width:0;height:36px;margin:0}
+@media(max-width:600px){
+  body{margin:0 auto;padding:8px}
+  .box{padding:12px;margin-bottom:9px}
+  .meta-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meta-secondary{grid-template-columns:minmax(105px,0.8fr) minmax(0,1.5fr)}
+  .meta-grid{gap:7px 8px}
+  .field label{font-size:12px}
+  .field input,.field select{font-size:14px;padding:6px}
+  h3{font-size:18px;margin:4px 0 10px}
+}
 .input-full{width:100%;}
 .stat{background:#eef4ff;padding:12px;border-radius:8px;font-size:14px;white-space:pre-wrap;line-height:1.6}
 .check-item{display:flex;align-items:center;gap:6px;margin:8px 0;}
@@ -52,22 +68,22 @@ h4{margin:0;font-size:16px;}
 </div>
 <div class="box">
 <h3>🚗 NOA路测事件记录仪</h3>
-<div class="input-row">
-<label>日期：</label>
-<input id="testDate" type="date">
+<div class="meta-grid meta-primary">
+<div class="field"><label for="testDate">日期</label>
+<input id="testDate" type="date"></div>
 
-<label>车辆：</label>
-<select id="testCar" style="width:150px;" onchange="handleChoiceChange('testCar')">
+<div class="field"><label for="testCar">车辆</label>
+<select id="testCar" onchange="handleChoiceChange('testCar')">
 <option value="377车" selected>377车</option>
 <option value="382车">382车</option>
 <option value="383车">383车</option>
 <option value="251车">251车</option>
 <option value="725车">725车</option>
 <option value="__custom__">自定义输入…</option>
-</select>
+</select></div>
 
-<label>重量：</label>
-<select id="testWeight" style="width:120px;" onchange="handleChoiceChange('testWeight')">
+<div class="field"><label for="testWeight">重量</label>
+<select id="testWeight" onchange="handleChoiceChange('testWeight')">
 <option value="35t">35t</option>
 <option value="36t">36t</option>
 <option value="37t">37t</option>
@@ -76,21 +92,21 @@ h4{margin:0;font-size:16px;}
 <option value="40t" selected>40t</option>
 <option value="41t">41t</option>
 <option value="__custom__">自定义输入…</option>
-</select>
+</select></div>
 
-<label>天气：</label>
+<div class="field"><label for="testWeather">天气</label>
 <select id="testWeather">
 <option value="晴天" selected>晴天</option>
 <option value="阴天">阴天</option>
 <option value="雨天">雨天</option>
 <option value="夜间">夜间</option>
-</select>
+</select></div>
 </div>
-<div class="input-row">
-<label>测试总里程(km)：</label>
-<input id="totalMile" type="number" placeholder="输入里程，例如300" value="300">
-<label>路线：</label>
-<input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市">
+<div class="meta-grid meta-secondary">
+<div class="field"><label for="totalMile">总里程（km）</label>
+<input id="totalMile" type="number" placeholder="例如300" value="300"></div>
+<div class="field"><label for="routeText">路线</label>
+<input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市"></div>
 </div>
 
 <p>正常事件直接点击按钮（无TTE勾选）；其余问题事件下拉选择，勾选本行TTE后点记录；日志自动本地保存，关闭页面不会丢失</p>
