@@ -30,6 +30,7 @@ select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
   body{margin:0 auto;padding:8px}
   .box{padding:12px;margin-bottom:9px}
   .meta-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .field-date,.field-car{grid-column:1/-1}
   .meta-secondary{grid-template-columns:minmax(105px,0.8fr) minmax(0,1.5fr)}
   .meta-grid{gap:7px 8px}
   .field label{font-size:12px}
@@ -43,6 +44,11 @@ select,input{padding:7px;font-size:14px;border:1px solid #ccc;border-radius:6px}
 h4{margin:0;font-size:16px;}
 .event-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;}
 .event-row select{flex:1;min-width:220px;}
+@media(max-width:600px){
+  .event-row{gap:6px}
+  .event-row select{min-width:0;width:auto;flex:1 1 130px}
+  .event-row .btn{margin:0;min-height:36px}
+}
 .btn-line{display:flex;align-items:center;gap:6px;margin:4px 0;flex-wrap:wrap}
 </style>
 </head>
@@ -69,10 +75,10 @@ h4{margin:0;font-size:16px;}
 <div class="box">
 <h3>🚗 NOA路测事件记录仪</h3>
 <div class="meta-grid meta-primary">
-<div class="field"><label for="testDate">日期</label>
+<div class="field field-date"><label for="testDate">日期</label>
 <input id="testDate" type="date"></div>
 
-<div class="field"><label for="testCar">车辆</label>
+<div class="field field-car"><label for="testCar">车辆</label>
 <select id="testCar" onchange="handleChoiceChange('testCar')">
 <option value="377车" selected>377车</option>
 <option value="382车">382车</option>
@@ -109,22 +115,26 @@ h4{margin:0;font-size:16px;}
 <input id="routeText" type="text" placeholder="例如：永乐东-零口" value="永乐东-腰市"></div>
 </div>
 
-<p>正常事件直接点击按钮（无TTE勾选）；其余问题事件下拉选择，勾选本行TTE后点记录；日志自动本地保存，关闭页面不会丢失</p>
+<p>正常事件下拉选择后点击蓝色按钮记录（无TTE）；其余问题事件选择后可勾选本行TTE再记录；日志自动本地保存</p>
 
 <div>
-<h4>✅正常事件记录（蓝色，直接点击）</h4>
-<div class="btn-line">
-<button class="btn btn-blue" onclick="addNormalLog('正常避让')">正常避让</button>
-<button class="btn btn-blue" onclick="addNormalLog('正常拨杆换道')">正常拨杆换道</button>
-<button class="btn btn-blue" onclick="addNormalLog('正常自动换道')">正常自动换道</button>
-<button class="btn btn-blue" onclick="addNormalLog('通过隧道')">通过隧道</button>
-<button class="btn btn-blue" onclick="addNormalLog('通过匝道')">通过匝道</button>
-<button class="btn btn-blue" onclick="addNormalLog('正常跟车')">正常跟车</button>
-<button class="btn btn-blue" onclick="addNormalLog('正常牵扯切入')">正常牵扯切入</button>
-<button class="btn btn-blue" onclick="addNormalLog('下坡→上坡')">下坡→上坡</button>
-<button class="btn btn-blue" onclick="addNormalLog('上坡→下坡')">上坡→下坡</button>
-<button class="btn btn-blue" onclick="addNormalLog('长上坡')">长上坡</button>
-<button class="btn btn-blue" onclick="addNormalLog('上下坡')">上下坡</button>
+<h4>✅正常事件记录（蓝色）</h4>
+<div class="event-row">
+<select id="normalEvent" aria-label="选择正常事件">
+<option value="">--选择正常事件--</option>
+<option value="正常避让">正常避让</option>
+<option value="正常拨杆换道">正常拨杆换道</option>
+<option value="正常自动换道">正常自动换道</option>
+<option value="通过隧道">通过隧道</option>
+<option value="通过匝道">通过匝道</option>
+<option value="正常跟车">正常跟车</option>
+<option value="正常牵扯切入">正常牵扯切入</option>
+<option value="下坡→上坡">下坡→上坡</option>
+<option value="上坡→下坡">上坡→下坡</option>
+<option value="长上坡">长上坡</option>
+<option value="上下坡">上下坡</option>
+</select>
+<button class="btn btn-blue" onclick="addNormalLogFromSelect()">记录正常事件</button>
 </div>
 </div>
 
@@ -457,6 +467,13 @@ function addNormalLog(eventName){
     const time=getNowTime();
     let line=`${time} ${eventName}`;
     appendLogLine(line);
+}
+function addNormalLogFromSelect(){
+    const select = document.getElementById('normalEvent');
+    const eventName = select.value;
+    if(!eventName){ alert('请先选择正常事件'); return; }
+    addNormalLog(eventName);
+    select.value = '';
 }
 
 //介入事件按钮点击（独立TTE）
